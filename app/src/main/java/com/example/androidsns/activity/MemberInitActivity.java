@@ -20,9 +20,6 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.example.androidsns.MemberInfo;
 import com.example.androidsns.R;
-import com.example.androidsns.activity.BasicActivity;
-import com.example.androidsns.activity.CameraActivity;
-import com.example.androidsns.activity.GalleryActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -55,8 +52,8 @@ public class MemberInitActivity extends BasicActivity {
         profileImageView.setOnClickListener(onClickListener);
 
         findViewById(R.id.checkButton).setOnClickListener(onClickListener);
-        findViewById(R.id.gallery).setOnClickListener(onClickListener);
-        findViewById(R.id.picture).setOnClickListener(onClickListener);
+        findViewById(R.id.delete).setOnClickListener(onClickListener);
+        findViewById(R.id.videoModify).setOnClickListener(onClickListener);
     }
 
     @Override
@@ -94,10 +91,10 @@ public class MemberInitActivity extends BasicActivity {
                         cardView.setVisibility(View.VISIBLE);
                     }
                     break;
-                case R.id.picture:
+                case R.id.videoModify:
                     myStartActivity(CameraActivity.class);
                     break;
-                case R.id.gallery:
+                case R.id.delete:
                     // 갤러리 권한 체크
                     if (ContextCompat.checkSelfPermission(MemberInitActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) { // 갤러리 권한이 없을 때
                         ActivityCompat.requestPermissions(MemberInitActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);

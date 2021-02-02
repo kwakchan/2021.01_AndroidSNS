@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,8 @@ public class WritePostActivity extends BasicActivity{
     private FirebaseUser user;
     private ArrayList<String> pathList = new ArrayList<>();
     private LinearLayout parent;
+    private RelativeLayout buttonsBackgroundLayout;
+    private ImageView selectedImageView;
     private int pathCount ;
     private int successCount;
 
@@ -54,37 +57,60 @@ public class WritePostActivity extends BasicActivity{
         setContentView(R.layout.activity_write_post);
 
         parent = findViewById(R.id.contentsLayout);
+        buttonsBackgroundLayout = findViewById(R.id.buttonsBackgroundLayout);
 
+        buttonsBackgroundLayout.setOnClickListener(onClickListener);
         findViewById(R.id.check).setOnClickListener(onClickListener);
         findViewById(R.id.image).setOnClickListener(onClickListener);
         findViewById(R.id.video).setOnClickListener(onClickListener);
+        findViewById(R.id.imageModify).setOnClickListener(onClickListener);
+        findViewById(R.id.videoModify).setOnClickListener(onClickListener);
+        findViewById(R.id.delete).setOnClickListener(onClickListener);
     }
 
     @Override
     public void onActivityResult(int requestCODE, int resultCode, Intent data) {
         super.onActivityResult(requestCODE, resultCode, data);
         switch (requestCODE){
-            case 0: {
+            case 0:
                 if(resultCode == Activity.RESULT_OK){
                     String profilePath = data.getStringExtra("profilePath");
                     pathList.add(profilePath); // 이미지 경로를 담은 리스트
 
                     ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    
+
+                    LinearLayout linearLayout = new LinearLayout(WritePostActivity.this);
+                    linearLayout.setLayoutParams(layoutParams);
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    parent.addView(linearLayout);
+
                     // 갤러리에서 이미지 추가
                     ImageView imageView = new ImageView(WritePostActivity.this);
                     imageView.setLayoutParams(layoutParams);
+                    imageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            buttonsBackgroundLayout.setVisibility(View.VISIBLE);
+                            selectedImageView = (ImageView) v;
+                        }
+                    });
                     Glide.with(this).load(profilePath).override(1000).into(imageView);
-                    parent.addView(imageView);
+                    linearLayout.addView(imageView);
                     
                     // EditText 추가
                     EditText editText = new EditText(WritePostActivity.this);
                     editText.setLayoutParams(layoutParams);
                     editText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT);
-                    parent.addView(editText);
+                    editText.setHint("내용");
+                    linearLayout.addView(editText);
                 }
                 break;
-            }
+            case 1:
+                if(resultCode == Activity.RESULT_OK) {
+                    String profilePath = data.getStringExtra("profilePath");
+                    Glide.with(this).load(profilePath).override(1000).into(selectedImageView);
+                }
+                break;
         }
     }
 
@@ -96,10 +122,26 @@ public class WritePostActivity extends BasicActivity{
                     storageUpload();
                     break;
                 case R.id.image:
-                    myStartActivity(GalleryActivity.class, "image");
+                    myStartActivity(GalleryActivity.class, "image", 0);
                     break;
                 case R.id.video:
-                    myStartActivity(GalleryActivity.class, "video");
+                    myStartActivity(GalleryActivity.class, "video", 0);
+                    break;
+                case R.id.buttonsBackgroundLayout:
+                    if(buttonsBackgroundLayout.getVisibility() == View.VISIBLE){
+                        buttonsBackgroundLayout.setVisibility(View.GONE);
+                    }
+                case R.id.imageModify:
+                     myStartActivity(GalleryActivity.class, "image", 1);
+                     buttonsBackgroundLayout.setVisibility(View.GONE);
+                    break;
+                case R.id.videoModify:
+                     myStartActivity(GalleryActivity.class, "video", 1);
+                     buttonsBackgroundLayout.setVisibility(View.GONE);
+                    break;
+                case R.id.delete:
+                      parent.removeView((View)selectedImageView.getParent());
+                      buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
             }
 
@@ -114,6 +156,8 @@ public class WritePostActivity extends BasicActivity{
             user = FirebaseAuth.getInstance().getCurrentUser();
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
+            FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+            final DocumentReference documentReference = firebaseFirestore.collection("cities").document();
 
             for(int i=0; i<parent.getChildCount(); i++){
                 View view = parent.getChildAt(i);
@@ -124,7 +168,7 @@ public class WritePostActivity extends BasicActivity{
                     }
                 } else {
                     contentList.add(pathList.get(pathCount));
-                    final StorageReference mountainImagesRef = storageRef.child("users/" + user.getUid()+"/" +pathCount+ ".jpg");
+                    final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() +"/" +pathCount+ ".jpg");
                     try{
                         InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
                         StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", ""+(contentList.size()-1)).build();
@@ -148,7 +192,7 @@ public class WritePostActivity extends BasicActivity{
                                         if(pathList.size() == successCount){
                                             // 완료
                                             WriteInfo writeInfo = new WriteInfo(title, contentList, user.getUid(), new Date());
-                                            storeUpload(writeInfo);
+                                            storeUpload(documentReference, writeInfo);
                                             for(int a=0; a<contentList.size(); a++){
                                                 Log.e("로그: ", "콘텐츠: " +contentList.get(a) );
                                             }
@@ -169,33 +213,30 @@ public class WritePostActivity extends BasicActivity{
 
     }
 
-    private void storeUpload(WriteInfo writeInfo){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("posts").add(writeInfo)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot written with ID"+documentReference.getId());
-                        finish();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        startToast("회원정보 등록을 실패하였습니다");
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
+    private void storeUpload(DocumentReference documentReference, WriteInfo writeInfo){
+        documentReference.set(writeInfo)
+            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d(TAG, "DocumentSnapshot successfully written!");
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.w(TAG, "Error writing document", e);
+                }
+            });
     }
 
     private void startToast(String msg){
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void myStartActivity(Class c, String media){
+    private void myStartActivity(Class c, String media, int requestCode){
         Intent intent = new Intent(this, c);
         intent.putExtra("media", media);
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, requestCode);
     }
 
 
