@@ -5,15 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_alignParentBottom="false"
-    android:layout_weight="1"
-    android:orientation="vertical"
-    android:padding="10dp"
-    android:visibility="visible">
+    android:layout_weight="1">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/textView"
@@ -105,13 +103,13 @@
             android:visibility="visible">
 
             <Button
-                android:id="@+id/videoModify"
+                android:id="@+id/picture"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="사진촬영" />
 
             <Button
-                android:id="@+id/delete"
+                android:id="@+id/gallary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="갤러리" />
@@ -119,5 +117,11 @@
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <include
+        layout="@layout/view_loader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 
 </RelativeLayout>

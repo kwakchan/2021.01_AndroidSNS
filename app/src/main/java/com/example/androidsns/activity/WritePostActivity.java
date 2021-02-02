@@ -2,7 +2,6 @@ package com.example.androidsns.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
@@ -18,13 +17,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
-import com.example.androidsns.MemberInfo;
 import com.example.androidsns.R;
 import com.example.androidsns.WriteInfo;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -47,6 +43,7 @@ public class WritePostActivity extends BasicActivity{
     private ArrayList<String> pathList = new ArrayList<>();
     private LinearLayout parent;
     private RelativeLayout buttonsBackgroundLayout;
+    private RelativeLayout loaderLayout;
     private ImageView selectedImageView;
     private EditText selectedEditText;
     private int pathCount ;
@@ -59,14 +56,15 @@ public class WritePostActivity extends BasicActivity{
 
         parent = findViewById(R.id.contentsLayout);
         buttonsBackgroundLayout = findViewById(R.id.buttonsBackgroundLayout);
+        loaderLayout = findViewById(R.id.loaderLayout);
 
         buttonsBackgroundLayout.setOnClickListener(onClickListener);
         findViewById(R.id.check).setOnClickListener(onClickListener);
         findViewById(R.id.image).setOnClickListener(onClickListener);
         findViewById(R.id.video).setOnClickListener(onClickListener);
         findViewById(R.id.imageModify).setOnClickListener(onClickListener);
-        findViewById(R.id.videoModify).setOnClickListener(onClickListener);
-        findViewById(R.id.delete).setOnClickListener(onClickListener);
+        findViewById(R.id.picture).setOnClickListener(onClickListener);
+        findViewById(R.id.gallary).setOnClickListener(onClickListener);
         findViewById(R.id.contentsEditText).setOnFocusChangeListener(onFocusChangeListener);
         findViewById(R.id.titleEditText).setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -158,11 +156,11 @@ public class WritePostActivity extends BasicActivity{
                      myStartActivity(GalleryActivity.class, "image", 1);
                      buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
-                case R.id.videoModify:
+                case R.id.picture:
                      myStartActivity(GalleryActivity.class, "video", 1);
                      buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
-                case R.id.delete:
+                case R.id.gallary:
                       parent.removeView((View)selectedImageView.getParent());
                       buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
@@ -184,6 +182,7 @@ public class WritePostActivity extends BasicActivity{
         final String title = ((EditText)findViewById(R.id.titleEditText)).getText().toString();
 
         if(title.length()>0){
+            loaderLayout.setVisibility(View.VISIBLE);
             ArrayList<String> contentList = new ArrayList<>();
             user = FirebaseAuth.getInstance().getCurrentUser();
             FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -244,6 +243,11 @@ public class WritePostActivity extends BasicActivity{
                     }
                 }
             }
+
+            if(pathList.size() == 0){
+                WriteInfo writeInfo = new WriteInfo(title, contentList, user.getUid(), new Date());
+                storeUpload(documentReference, writeInfo);
+            }
         } else {
             startToast("제목을 입력해주세요");
         }
@@ -256,12 +260,14 @@ public class WritePostActivity extends BasicActivity{
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d(TAG, "DocumentSnapshot successfully written!");
+                    loaderLayout.setVisibility(View.GONE);
                     finish();
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
+                    loaderLayout.setVisibility(View.GONE);
                     Log.w(TAG, "Error writing document", e);
                 }
             });
