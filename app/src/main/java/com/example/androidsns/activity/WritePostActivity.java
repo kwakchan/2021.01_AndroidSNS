@@ -203,7 +203,8 @@ public class WritePostActivity extends BasicActivity {
                         }
                     } else {
                         contentList.add(pathList.get(pathCount));
-                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + ".jpg");
+                        String[] pathArray = pathList.get(pathCount).split("\\."); // 이미지나 동영상의 확장자명
+                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + pathArray[pathArray.length-1]);
                         try {
                             InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
                             StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", "" + (contentList.size() - 1)).build();

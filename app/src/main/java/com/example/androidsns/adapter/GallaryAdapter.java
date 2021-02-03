@@ -22,9 +22,9 @@ public class GallaryAdapter extends RecyclerView.Adapter<GallaryAdapter.GallayVi
     private ArrayList<String> mDataSet;
     private Activity activity;
 
-    public static class GallayViewHolder extends RecyclerView.ViewHolder {
-        public CardView cardView;
-        public GallayViewHolder(CardView v) {
+    static class GallayViewHolder extends RecyclerView.ViewHolder {
+        CardView cardView;
+        GallayViewHolder(CardView v) {
             super(v);
             cardView = v;
         }

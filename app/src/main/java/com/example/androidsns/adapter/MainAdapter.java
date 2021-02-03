@@ -2,11 +2,12 @@ package com.example.androidsns.adapter;
 
 
 import android.app.Activity;
-import android.content.Intent;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,16 +20,18 @@ import com.example.androidsns.R;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GallayViewHolder> {
 
     private ArrayList<PostInfo> mDataSet;
     private Activity activity;
 
-    public static class GallayViewHolder extends RecyclerView.ViewHolder {
-        public CardView cardView;
-        public GallayViewHolder(CardView v) {
+    static class GallayViewHolder extends RecyclerView.ViewHolder {
+        CardView cardView;
+        GallayViewHolder(CardView v) {
             super(v);
             cardView = v;
         }
@@ -57,8 +60,33 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GallayViewHold
     @Override
     public void onBindViewHolder(GallayViewHolder holder, int position) { // 이미지를 불러오는 함수
         CardView cardView = holder.cardView;
-        TextView textView = cardView.findViewById(R.id.textView);
-        textView.setText(mDataSet.get(position).getTitle());
+        
+        // 제목
+        TextView titleTextView = cardView.findViewById(R.id.titleTextView);
+        titleTextView.setText(mDataSet.get(position).getTitle());
+
+        // 날짜
+        TextView createdTextView = cardView.findViewById(R.id.createdAtTextView);
+        createdTextView.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(mDataSet.get(position).getCreatedAt()));
+
+        // 이미지 동영상
+        LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ArrayList<String> contentsList = mDataSet.get(position).getContents();
+        for(int i=0; i<contentsList.size(); i++){
+            String contents = contentsList.get(i);
+            if(Patterns.WEB_URL.matcher(contents).matches()){
+                ImageView imageView = new ImageView(activity);
+                imageView.setLayoutParams(layoutParams);
+                contentsLayout.addView(imageView);
+                Glide.with(activity).load(contents).override(1000).into(imageView);
+            } else {
+                TextView textView = new TextView(activity);
+                textView.setLayoutParams(layoutParams);
+                textView.setText(contents);
+                contentsLayout.addView(textView);
+            }
+        }
     }
 
     @Override
