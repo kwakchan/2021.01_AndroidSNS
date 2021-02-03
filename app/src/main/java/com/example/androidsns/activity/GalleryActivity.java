@@ -8,18 +8,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidsns.R;
-import com.example.androidsns.acapter.GallaryAdapter;
+import com.example.androidsns.adapter.GallaryAdapter;
 
 import java.util.ArrayList;
 
@@ -30,6 +28,7 @@ public class GalleryActivity extends BasicActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallary);
 
+        // 갤러리 권한
         if (ContextCompat.checkSelfPermission(GalleryActivity.this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) { // 갤러리 권한이 없을 때
             ActivityCompat.requestPermissions(GalleryActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             if(ActivityCompat.shouldShowRequestPermissionRationale(GalleryActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)){

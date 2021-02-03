@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
 import com.example.androidsns.R;
-import com.example.androidsns.WriteInfo;
+import com.example.androidsns.PostInfo;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +37,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class WritePostActivity extends BasicActivity{
+public class WritePostActivity extends BasicActivity {
     private static final String TAG = "WritePostActivity";
     private FirebaseUser user;
     private ArrayList<String> pathList = new ArrayList<>();
@@ -46,7 +46,7 @@ public class WritePostActivity extends BasicActivity{
     private RelativeLayout loaderLayout;
     private ImageView selectedImageView;
     private EditText selectedEditText;
-    private int pathCount ;
+    private int pathCount;
     private int successCount;
 
     @Override
@@ -69,7 +69,7 @@ public class WritePostActivity extends BasicActivity{
         findViewById(R.id.titleEditText).setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
+                if (hasFocus) {
                     selectedEditText = null;
                 }
 
@@ -80,9 +80,9 @@ public class WritePostActivity extends BasicActivity{
     @Override
     public void onActivityResult(int requestCODE, int resultCode, Intent data) {
         super.onActivityResult(requestCODE, resultCode, data);
-        switch (requestCODE){
+        switch (requestCODE) {
             case 0:
-                if(resultCode == Activity.RESULT_OK){
+                if (resultCode == Activity.RESULT_OK) {
                     String profilePath = data.getStringExtra("profilePath");
                     pathList.add(profilePath); // 이미지 경로를 담은 리스트
 
@@ -91,14 +91,14 @@ public class WritePostActivity extends BasicActivity{
                     LinearLayout linearLayout = new LinearLayout(WritePostActivity.this);
                     linearLayout.setLayoutParams(layoutParams);
                     linearLayout.setOrientation(LinearLayout.VERTICAL);
-    
+
                     // 갤러리에서 이미지나 동영상 여러개 추가
-                    if(selectedEditText == null){
+                    if (selectedEditText == null) {
                         parent.addView(linearLayout);
                     } else {
-                        for(int i=0; i<parent.getChildCount(); i++){
-                            if(parent.getChildAt(i) == selectedEditText.getParent() ){
-                                parent.addView(linearLayout, i+1);
+                        for (int i = 0; i < parent.getChildCount(); i++) {
+                            if (parent.getChildAt(i) == selectedEditText.getParent()) {
+                                parent.addView(linearLayout, i + 1);
                                 break;
                             }
                         }
@@ -116,7 +116,7 @@ public class WritePostActivity extends BasicActivity{
                     });
                     Glide.with(this).load(profilePath).override(1000).into(imageView);
                     linearLayout.addView(imageView);
-                    
+
                     // EditText 추가
                     EditText editText = new EditText(WritePostActivity.this);
                     editText.setLayoutParams(layoutParams);
@@ -127,7 +127,7 @@ public class WritePostActivity extends BasicActivity{
                 }
                 break;
             case 1:
-                if(resultCode == Activity.RESULT_OK) {
+                if (resultCode == Activity.RESULT_OK) {
                     String profilePath = data.getStringExtra("profilePath");
                     Glide.with(this).load(profilePath).override(1000).into(selectedImageView);
                 }
@@ -138,7 +138,7 @@ public class WritePostActivity extends BasicActivity{
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.check:
                     storageUpload();
                     break;
@@ -149,20 +149,20 @@ public class WritePostActivity extends BasicActivity{
                     myStartActivity(GalleryActivity.class, "video", 0);
                     break;
                 case R.id.buttonsBackgroundLayout:
-                    if(buttonsBackgroundLayout.getVisibility() == View.VISIBLE){
+                    if (buttonsBackgroundLayout.getVisibility() == View.VISIBLE) {
                         buttonsBackgroundLayout.setVisibility(View.GONE);
                     }
                 case R.id.imageModify:
-                     myStartActivity(GalleryActivity.class, "image", 1);
-                     buttonsBackgroundLayout.setVisibility(View.GONE);
+                    myStartActivity(GalleryActivity.class, "image", 1);
+                    buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
                 case R.id.picture:
-                     myStartActivity(GalleryActivity.class, "video", 1);
-                     buttonsBackgroundLayout.setVisibility(View.GONE);
+                    myStartActivity(GalleryActivity.class, "video", 1);
+                    buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
                 case R.id.gallary:
-                      parent.removeView((View)selectedImageView.getParent());
-                      buttonsBackgroundLayout.setVisibility(View.GONE);
+                    parent.removeView((View) selectedImageView.getParent());
+                    buttonsBackgroundLayout.setVisibility(View.GONE);
                     break;
             }
 
@@ -172,16 +172,16 @@ public class WritePostActivity extends BasicActivity{
     View.OnFocusChangeListener onFocusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if(hasFocus){
+            if (hasFocus) {
                 selectedEditText = (EditText) v;
             }
         }
     };
 
-    private void storageUpload(){
-        final String title = ((EditText)findViewById(R.id.titleEditText)).getText().toString();
+    private void storageUpload() {
+        final String title = ((EditText) findViewById(R.id.titleEditText)).getText().toString();
 
-        if(title.length()>0){
+        if (title.length() > 0) {
             loaderLayout.setVisibility(View.VISIBLE);
             ArrayList<String> contentList = new ArrayList<>();
             user = FirebaseAuth.getInstance().getCurrentUser();
@@ -190,23 +190,23 @@ public class WritePostActivity extends BasicActivity{
             FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
             final DocumentReference documentReference = firebaseFirestore.collection("posts").document();
 
-            for(int i=0; i<parent.getChildCount(); i++){
-                LinearLayout linearLayout = (LinearLayout)parent.getChildAt(i);
+            for (int i = 0; i < parent.getChildCount(); i++) {
+                LinearLayout linearLayout = (LinearLayout) parent.getChildAt(i);
 
-                for(int ii=0; ii<linearLayout.getChildCount(); ii++){
+                for (int ii = 0; ii < linearLayout.getChildCount(); ii++) {
                     View view = linearLayout.getChildAt(ii);
 
-                    if(view instanceof EditText){
-                        String text = ((EditText)view).getText().toString();
-                        if(text.length()>0){
+                    if (view instanceof EditText) {
+                        String text = ((EditText) view).getText().toString();
+                        if (text.length() > 0) {
                             contentList.add(text);
                         }
                     } else {
                         contentList.add(pathList.get(pathCount));
-                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() +"/" +pathCount+ ".jpg");
-                        try{
+                        final StorageReference mountainImagesRef = storageRef.child("posts/" + documentReference.getId() + "/" + pathCount + ".jpg");
+                        try {
                             InputStream stream = new FileInputStream(new File(pathList.get(pathCount)));
-                            StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", ""+(contentList.size()-1)).build();
+                            StorageMetadata metadata = new StorageMetadata.Builder().setCustomMetadata("index", "" + (contentList.size() - 1)).build();
                             UploadTask uploadTask = mountainImagesRef.putStream(stream, metadata);
                             uploadTask.addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -221,32 +221,32 @@ public class WritePostActivity extends BasicActivity{
                                     mountainImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                         @Override
                                         public void onSuccess(Uri uri) {
-                                            Log.e("로그: ", "uri: " +uri);
+                                            Log.e("로그: ", "uri: " + uri);
                                             contentList.set(index, uri.toString());
                                             successCount++;
-                                            if(pathList.size() == successCount){
+                                            if (pathList.size() == successCount) {
                                                 // 완료
-                                                WriteInfo writeInfo = new WriteInfo(title, contentList, user.getUid(), new Date());
-                                                storeUpload(documentReference, writeInfo);
-                                                for(int a=0; a<contentList.size(); a++){
-                                                    Log.e("로그: ", "콘텐츠: " +contentList.get(a) );
+                                                PostInfo postInfo = new PostInfo(title, contentList, user.getUid(), new Date());
+                                                storeUpload(documentReference, postInfo);
+                                                for (int a = 0; a < contentList.size(); a++) {
+                                                    Log.e("로그: ", "콘텐츠: " + contentList.get(a));
                                                 }
                                             }
                                         }
                                     });
                                 }
                             });
-                        }catch (FileNotFoundException e){
-                            Log.e("로그:", "에러: " + e.toString() );
+                        } catch (FileNotFoundException e) {
+                            Log.e("로그:", "에러: " + e.toString());
                         }
                         pathCount++;
                     }
                 }
             }
 
-            if(pathList.size() == 0){
-                WriteInfo writeInfo = new WriteInfo(title, contentList, user.getUid(), new Date());
-                storeUpload(documentReference, writeInfo);
+            if (pathList.size() == 0) {
+                PostInfo postInfo = new PostInfo(title, contentList, user.getUid(), new Date());
+                storeUpload(documentReference, postInfo);
             }
         } else {
             startToast("제목을 입력해주세요");
@@ -254,30 +254,30 @@ public class WritePostActivity extends BasicActivity{
 
     }
 
-    private void storeUpload(DocumentReference documentReference, WriteInfo writeInfo){
-        documentReference.set(writeInfo)
-            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    Log.d(TAG, "DocumentSnapshot successfully written!");
-                    loaderLayout.setVisibility(View.GONE);
-                    finish();
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    loaderLayout.setVisibility(View.GONE);
-                    Log.w(TAG, "Error writing document", e);
-                }
-            });
+    private void storeUpload(DocumentReference documentReference, PostInfo postInfo) {
+        documentReference.set(postInfo)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                        loaderLayout.setVisibility(View.GONE);
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        loaderLayout.setVisibility(View.GONE);
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
     }
 
-    private void startToast(String msg){
+    private void startToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-    private void myStartActivity(Class c, String media, int requestCode){
+    private void myStartActivity(Class c, String media, int requestCode) {
         Intent intent = new Intent(this, c);
         intent.putExtra("media", media);
         startActivityForResult(intent, requestCode);
