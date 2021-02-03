@@ -73,20 +73,24 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.GallayViewHold
         LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         ArrayList<String> contentsList = mDataSet.get(position).getContents();
-        for(int i=0; i<contentsList.size(); i++){
-            String contents = contentsList.get(i);
-            if(Patterns.WEB_URL.matcher(contents).matches()){
-                ImageView imageView = new ImageView(activity);
-                imageView.setLayoutParams(layoutParams);
-                contentsLayout.addView(imageView);
-                Glide.with(activity).load(contents).override(1000).into(imageView);
-            } else {
-                TextView textView = new TextView(activity);
-                textView.setLayoutParams(layoutParams);
-                textView.setText(contents);
-                contentsLayout.addView(textView);
+
+        if(contentsLayout.getChildCount() == 0){
+            for(int i=0; i<contentsList.size(); i++){
+                String contents = contentsList.get(i);
+                if(Patterns.WEB_URL.matcher(contents).matches()){
+                    ImageView imageView = new ImageView(activity);
+                    imageView.setLayoutParams(layoutParams);
+                    contentsLayout.addView(imageView);
+                    Glide.with(activity).load(contents).override(1000).into(imageView);
+                } else {
+                    TextView textView = new TextView(activity);
+                    textView.setLayoutParams(layoutParams);
+                    textView.setText(contents);
+                    contentsLayout.addView(textView);
+                }
             }
         }
+
     }
 
     @Override

@@ -32,6 +32,7 @@ public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
     private FirebaseUser firebaseUser;
     private FirebaseFirestore firebaseFirestore;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +69,11 @@ public class MainActivity extends BasicActivity {
         }
 
 //        findViewById(R.id.logoutButton).setOnClickListener(onClickListener);
+        recyclerView = findViewById(R.id.recyclerView);
         findViewById(R.id.floatingActionButton).setOnClickListener(onClickListener);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
     }
 
     protected void onResume(){ // 재실행 될 때 DB업데이트
@@ -80,7 +85,7 @@ public class MainActivity extends BasicActivity {
             firebaseFirestore = FirebaseFirestore.getInstance();
             CollectionReference collectionReference = firebaseFirestore.collection("posts");
             collectionReference
-                    .orderBy("title", Query.Direction.DESCENDING)
+                    .orderBy("createdAt", Query.Direction.DESCENDING)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
@@ -97,10 +102,6 @@ public class MainActivity extends BasicActivity {
                                             new Date(document.getDate("createdAt").getTime())
                                     ));
                                 }
-
-                                RecyclerView recyclerView = findViewById(R.id.recyclerView);
-                                recyclerView.setHasFixedSize(true);
-                                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
                                 RecyclerView.Adapter mAdapter = new MainAdapter(MainActivity.this, postList);
                                 recyclerView.setAdapter(mAdapter);
