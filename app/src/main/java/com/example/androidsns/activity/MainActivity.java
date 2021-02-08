@@ -76,6 +76,7 @@ public class MainActivity extends BasicActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
     }
 
+    @Override
     protected void onResume(){ // 재실행 될 때 DB업데이트
         super.onResume();
 
@@ -99,7 +100,8 @@ public class MainActivity extends BasicActivity {
                                             document.getData().get("title").toString(),
                                             (ArrayList<String>)document.getData().get("contents"),
                                             document.getData().get("publisher").toString(),
-                                            new Date(document.getDate("createdAt").getTime())
+                                            new Date(document.getDate("createdAt").getTime()),
+                                            document.getId()
                                     ));
                                 }
 
