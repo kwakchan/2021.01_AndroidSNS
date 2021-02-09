@@ -45,30 +45,9 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     static class MainViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
 
-        MainViewHolder(Activity activity, CardView v, PostInfo postInfo) {
+        MainViewHolder(CardView v) {
             super(v);
             cardView = v;
-
-            LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
-            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            ArrayList<String> contentsList = postInfo.getContents();
-
-            if (contentsLayout.getChildCount() == 0) {
-                for (int i = 0; i < contentsList.size(); i++) {
-                    String contents = contentsList.get(i);
-                    if (Patterns.WEB_URL.matcher(contents).matches()) {
-                        ImageView imageView = new ImageView(activity);
-                        imageView.setLayoutParams(layoutParams);
-                        imageView.setAdjustViewBounds(true);
-                        imageView.setScaleType(ImageView.ScaleType.FIT_XY); // 이미지 꽉 채우기
-                        contentsLayout.addView(imageView);
-                    } else {
-                        TextView textView = new TextView(activity);
-                        textView.setLayoutParams(layoutParams);
-                        contentsLayout.addView(textView);
-                    }
-                }
-            }
         }
     }
 
@@ -91,7 +70,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     @Override
     public MainAdapter.MainViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_post, parent, false);
-        final MainViewHolder mainViewHolder = new MainViewHolder(activity, cardView, mDataSet.get(viewType));
+        final MainViewHolder mainViewHolder = new MainViewHolder(cardView);
 
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,17 +103,30 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
 
         // 이미지 동영상
         LinearLayout contentsLayout = cardView.findViewById(R.id.contentsLayout);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         ArrayList<String> contentsList = mDataSet.get(position).getContents();
 
-        for (int i = 0; i < contentsList.size(); i++) {
-            String contents = contentsList.get(i);
-            if (Patterns.WEB_URL.matcher(contents).matches()) {
-                Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into((ImageView)contentsLayout.getChildAt(i)); // thumbnail(0.1f): 이미지 10%로 낮은 화질로 먼저 보여줌
-            } else {
-                ((TextView)contentsLayout.getChildAt(i)).setText(contents);
+        contentsLayout.removeAllViews();
 
+        if(contentsList.size() > 0){
+            for (int i = 0; i < contentsList.size(); i++) {
+                String contents = contentsList.get(i);
+                if (Patterns.WEB_URL.matcher(contents).matches()) {
+                    ImageView imageView = new ImageView(activity);
+                    imageView.setLayoutParams(layoutParams);
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_XY); // 이미지 꽉 채우기
+                    contentsLayout.addView(imageView);
+                    Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView); // thumbnail(0.1f): 이미지 10%로 낮은 화질로 먼저 보여줌
+                } else {
+                    TextView textView = new TextView(activity);
+                    textView.setLayoutParams(layoutParams);
+                    textView.setText(contents);
+                    contentsLayout.addView(textView);
+                }
             }
         }
+
     }
 
     @Override

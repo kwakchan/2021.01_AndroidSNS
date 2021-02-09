@@ -68,8 +68,6 @@ public class MainActivity extends BasicActivity {
                     }
                 }
             });
-
-
         }
 
         util = new Util(this);
@@ -88,41 +86,7 @@ public class MainActivity extends BasicActivity {
     @Override
     protected void onResume() { // 재실행 될 때 DB업데이트
         super.onResume();
-
-        if (firebaseUser == null) { // 회원가입 되어있지않으면
-            myStartActivity(SignUpActivity.class); // 회원가입 화면으로 보내기
-        } else { // 회원가입 되어있다면
-            firebaseFirestore = FirebaseFirestore.getInstance();
-            CollectionReference collectionReference = firebaseFirestore.collection("posts");
-            collectionReference
-                    .orderBy("createdAt", Query.Direction.DESCENDING)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                postList.clear();
-
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                    postList.add(new PostInfo(
-                                            document.getData().get("title").toString(),
-                                            (ArrayList<String>) document.getData().get("contents"),
-                                            document.getData().get("publisher").toString(),
-                                            new Date(document.getDate("createdAt").getTime()),
-                                            document.getId()
-                                    ));
-                                }
-                                mainAdapter.notifyDataSetChanged();
-
-                            } else {
-                                Log.d(TAG, "Error getting documents: ", task.getException());
-                            }
-                        }
-                    });
-
-
-        }
+        postUpdate();
     }
 
     OnPostListener onPostListener = new OnPostListener() {
@@ -135,6 +99,7 @@ public class MainActivity extends BasicActivity {
                         @Override
                         public void onSuccess(Void aVoid) {
                             util.showToast("게시글을 삭제하였습니다.");
+                            postUpdate();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -167,6 +132,38 @@ public class MainActivity extends BasicActivity {
             }
         }
     };
+
+    private void postUpdate(){
+        if (firebaseUser != null) { // 회원가입 되어있지않으면
+            CollectionReference collectionReference = firebaseFirestore.collection("posts");
+            collectionReference
+                    .orderBy("createdAt", Query.Direction.DESCENDING)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                postList.clear();
+
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                    postList.add(new PostInfo(
+                                            document.getData().get("title").toString(),
+                                            (ArrayList<String>) document.getData().get("contents"),
+                                            document.getData().get("publisher").toString(),
+                                            new Date(document.getDate("createdAt").getTime()),
+                                            document.getId()
+                                    ));
+                                }
+                                mainAdapter.notifyDataSetChanged();
+
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+        }
+    }
 
     private void myStartActivity(Class c) {
         Intent intent = new Intent(this, c);
