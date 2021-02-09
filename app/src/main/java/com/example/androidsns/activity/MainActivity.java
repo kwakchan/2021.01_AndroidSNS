@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.example.androidsns.PostInfo;
 import com.example.androidsns.R;
+import com.example.androidsns.Util;
 import com.example.androidsns.adapter.MainAdapter;
 import com.example.androidsns.listener.OnPostListener;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -26,7 +27,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,6 +37,7 @@ public class MainActivity extends BasicActivity {
     private FirebaseFirestore firebaseFirestore;
     private MainAdapter mainAdapter;
     private ArrayList<PostInfo> postList;
+    private Util util;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,7 @@ public class MainActivity extends BasicActivity {
 
         }
 
+        util = new Util(this);
         postList = new ArrayList<>();
         mainAdapter = new MainAdapter(MainActivity.this, postList);
         mainAdapter.setOnPostListener(onPostListener);
@@ -125,27 +127,27 @@ public class MainActivity extends BasicActivity {
 
     OnPostListener onPostListener = new OnPostListener() {
         @Override
-        public void onDelete() {
-            Log.e("로그", "삭제");
-//            firebaseFirestore.collection("posts").document(mDataSet.get(position).getId())
-//                    .delete()
-//                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                        @Override
-//                        public void onSuccess(Void aVoid) {
-//                            startToast("게시글을 삭제하였습니다.");
-//                        }
-//                    })
-//                    .addOnFailureListener(new OnFailureListener() {
-//                        @Override
-//                        public void onFailure(@NonNull Exception e) {
-//                            startToast("게시글을 삭제하지 못하였습니다.");
-//                        }
-//                    });
+        public void onDelete(String id) {
+            Log.e("로그", "삭제: "+id);
+            firebaseFirestore.collection("posts").document(id)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            util.showToast("게시글을 삭제하였습니다.");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            util.showToast("게시글을 삭제하지 못하였습니다.");
+                        }
+                    });
         }
 
         @Override
-        public void onModify() {
-            Log.e("로그", "수정");
+        public void onModify(String id) {
+            Log.e("로그", "수정: "+id);
 
         }
     };

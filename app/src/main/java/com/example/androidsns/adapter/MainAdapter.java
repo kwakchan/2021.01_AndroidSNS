@@ -147,13 +147,14 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                String id = mDataSet.get(position).getId();
                 switch (item.getItemId()) {
                     case R.id.modify:
-                        onPostListener.onModify();
+                        onPostListener.onModify(id);
 
                         return true;
                     case R.id.delete:
-                        onPostListener.onDelete();
+                        onPostListener.onDelete(id);
 
                         return true;
                     default:

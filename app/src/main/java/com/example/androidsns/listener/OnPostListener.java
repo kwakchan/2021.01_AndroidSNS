@@ -1,6 +1,6 @@
 package com.example.androidsns.listener;
 
 public interface OnPostListener {
-    void onDelete();
-    void onModify();
+    void onDelete(String id);
+    void onModify(String id);
 }
