@@ -106,23 +106,26 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         ArrayList<String> contentsList = mDataSet.get(position).getContents();
 
-        contentsLayout.removeAllViews();
+        if(contentsLayout.getTag() == null || !contentsLayout.getTag().equals(contentsList)){
+            contentsLayout.setTag(contentsList);
+            contentsLayout.removeAllViews();
 
-        if(contentsList.size() > 0){
-            for (int i = 0; i < contentsList.size(); i++) {
-                String contents = contentsList.get(i);
-                if (Patterns.WEB_URL.matcher(contents).matches()) {
-                    ImageView imageView = new ImageView(activity);
-                    imageView.setLayoutParams(layoutParams);
-                    imageView.setAdjustViewBounds(true);
-                    imageView.setScaleType(ImageView.ScaleType.FIT_XY); // 이미지 꽉 채우기
-                    contentsLayout.addView(imageView);
-                    Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView); // thumbnail(0.1f): 이미지 10%로 낮은 화질로 먼저 보여줌
-                } else {
-                    TextView textView = new TextView(activity);
-                    textView.setLayoutParams(layoutParams);
-                    textView.setText(contents);
-                    contentsLayout.addView(textView);
+            if(contentsList.size() > 0){
+                for (int i = 0; i < contentsList.size(); i++) {
+                    String contents = contentsList.get(i);
+                    if (Patterns.WEB_URL.matcher(contents).matches()) {
+                        ImageView imageView = new ImageView(activity);
+                        imageView.setLayoutParams(layoutParams);
+                        imageView.setAdjustViewBounds(true);
+                        imageView.setScaleType(ImageView.ScaleType.FIT_XY); // 이미지 꽉 채우기
+                        contentsLayout.addView(imageView);
+                        Glide.with(activity).load(contents).override(1000).thumbnail(0.1f).into(imageView); // thumbnail(0.1f): 이미지 10%로 낮은 화질로 먼저 보여줌
+                    } else {
+                        TextView textView = new TextView(activity);
+                        textView.setLayoutParams(layoutParams);
+                        textView.setText(contents);
+                        contentsLayout.addView(textView);
+                    }
                 }
             }
         }
