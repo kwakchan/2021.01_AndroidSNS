@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
+    android:layout_marginBottom="5dp"
     android:layout_weight="1"
     android:scrollbarSize="30dp"
     app:cardCornerRadius="10dp">
@@ -35,16 +36,24 @@
                 android:id="@+id/menu"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                app:cardCornerRadius="20dp">
+                android:layout_margin="5dp"
+                app:cardCornerRadius="15dp">
 
                 <ImageView
                     android:id="@+id/imageView2"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_margin="3dp"
                     app:srcCompat="@drawable/ic_baseline_more_vert_24" />
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:background="#7A6E6E"></RelativeLayout>
 
         <LinearLayout
             android:id="@+id/contentsLayout"

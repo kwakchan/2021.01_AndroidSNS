@@ -5,10 +5,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.androidsns.PostInfo;
 import com.example.androidsns.R;
 import com.example.androidsns.Util;
@@ -27,6 +32,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,9 +42,11 @@ public class MainActivity extends BasicActivity {
     private static final String TAG = "MainActivity";
     private FirebaseUser firebaseUser;
     private FirebaseFirestore firebaseFirestore;
+    private StorageReference storageRef;
     private MainAdapter mainAdapter;
     private ArrayList<PostInfo> postList;
     private Util util;
+    private int successCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +54,8 @@ public class MainActivity extends BasicActivity {
         setContentView(R.layout.activity_main);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
 
         if (firebaseUser != null) { // 회원가입 되어있지않으면
             // 회원가입 되어있다면
@@ -91,8 +102,8 @@ public class MainActivity extends BasicActivity {
 
     OnPostListener onPostListener = new OnPostListener() {
         @Override
-        public void onDelete(String id) {
-            Log.e("로그", "삭제: "+id);
+        public void onDelete(int position) {
+            String id = postList.get(position).getId();
             firebaseFirestore.collection("posts").document(id)
                     .delete()
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -108,10 +119,42 @@ public class MainActivity extends BasicActivity {
                             util.showToast("게시글을 삭제하지 못하였습니다.");
                         }
                     });
+
+            // 스토리지에서도 이미지 삭제
+            ArrayList<String> contentsList = postList.get(position).getContents();
+            for (int i = 0; i < contentsList.size(); i++) {
+                String contents = contentsList.get(i);
+                if (Patterns.WEB_URL.matcher(contents).matches() && contents.contains("https://firebasestorage.googleapis.com/v0/b/sns-project-b2806.appspot.com/o/post")) {
+                    successCount++;
+                    String[] list = contents.split("\\?");
+                    String[] list2 = list[0].split("%2F");
+                    String name = list2[list2.length-1];
+
+                    StorageReference desertRef = storageRef.child("posts/"+id+"/"+name);
+                    desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            util.showToast("삭제하였습니다."); // File deleted successfully
+                            successCount--;
+
+                            if(successCount == 0){
+
+                            }
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            util.showToast("삭제하지 못하였습니다."); // Uh-oh, an error occurred!
+                        }
+                    });
+                }
+            }
         }
 
         @Override
-        public void onModify(String id) {
+        public void onModify(int position) {
+            String id = postList.get(position).getId();
             myStartActivity(WritePostActivity.class, id);
         }
     };
