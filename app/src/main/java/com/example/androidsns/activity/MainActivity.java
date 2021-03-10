@@ -103,22 +103,7 @@ public class MainActivity extends BasicActivity {
     OnPostListener onPostListener = new OnPostListener() {
         @Override
         public void onDelete(int position) {
-            String id = postList.get(position).getId();
-            firebaseFirestore.collection("posts").document(id)
-                    .delete()
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            util.showToast("게시글을 삭제하였습니다.");
-                            postUpdate();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            util.showToast("게시글을 삭제하지 못하였습니다.");
-                        }
-                    });
+            final String id = postList.get(position).getId();
 
             // 스토리지에서도 이미지 삭제
             ArrayList<String> contentsList = postList.get(position).getContents();
@@ -136,26 +121,22 @@ public class MainActivity extends BasicActivity {
                         public void onSuccess(Void aVoid) {
                             util.showToast("삭제하였습니다."); // File deleted successfully
                             successCount--;
-
-                            if(successCount == 0){
-
-                            }
-
+                            storeUploader(id);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            util.showToast("삭제하지 못하였습니다."); // Uh-oh, an error occurred!
+                            util.showToast("문제가 발생하였습니다."); // Uh-oh, an error occurred!
                         }
                     });
                 }
             }
+            storeUploader(id);
         }
 
         @Override
         public void onModify(int position) {
-            String id = postList.get(position).getId();
-            myStartActivity(WritePostActivity.class, id);
+            myStartActivity(WritePostActivity.class, postList.get(position));
         }
     };
 
@@ -206,15 +187,35 @@ public class MainActivity extends BasicActivity {
                     });
         }
     }
+    private void storeUploader(String id){
+        if(successCount == 0) {
+            firebaseFirestore.collection("posts").document(id)
+                    .delete()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            util.showToast("게시글을 삭제하였습니다.");
+                            postUpdate();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            util.showToast("게시글을 삭제하지 못하였습니다.");
+                        }
+                    });
+        }
+    }
+
 
     private void myStartActivity(Class c) {
         Intent intent = new Intent(this, c);
         startActivity(intent);
     }
 
-    private void myStartActivity(Class c, String id) {
+    private void myStartActivity(Class c, PostInfo postInfo) {
         Intent intent = new Intent(this, c);
-        intent.putExtra("id", id);
+        intent.putExtra("postInfo", postInfo);
         startActivity(intent);
     }
 }
